@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nocio — Twój obiekt odpowiada gościom, zanim wstaniesz z łóżka</title>
+    <meta name="description" content="Asystent AI dla obiektów noclegowych 1-30 pokoi. Automatyczne odpowiedzi na rezerwacje, maile, faktury, dynamiczne ceny. Działający system, nie obietnica.">
+    <style>
+        :root {
+            --navy: #0B1A2E;
+            --navy-light: #132B4A;
+            --gold: #D4A843;
+            --gold-light: #E8C36A;
+            --white: #F8F6F0;
+            --gray: #A0A8B4;
+            --green: #34D399;
+            --red: #F87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--navy);
+            color: var(--white);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(212, 168, 67, 0.15);
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 168, 67, 0.3);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: clamp(28px, 5vw, 44px);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        h1 .highlight {
+            color: var(--gold);
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--gray);
+            max-width: 540px;
+            margin: 0 auto 40px;
+        }
+
+        /* PROOF BAR */
+        .proof-bar {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .proof-item {
+            text-align: center;
+        }
+
+        .proof-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .proof-label {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        /* PROBLEM / SOLUTION */
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(22px, 3.5vw, 32px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        @media (max-width: 600px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        .col-before, .col-after {
+            background: var(--navy-light);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .col-before {
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .col-after {
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .col-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .col-before .col-title { color: var(--red); }
+        .col-after .col-title { color: var(--green); }
+
+        .col-before li, .col-after li {
+            list-style: none;
+            padding: 8px 0;
+            font-size: 15px;
+            color: var(--gray);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .col-before li:last-child, .col-after li:last-child {
+            border-bottom: none;
+        }
+
+        .col-before li::before {
+            content: "\2717  ";
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .col-after li::before {
+            content: "\2713  ";
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* FEATURES */
+        .features {
+            display: grid;
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .feature-card {
+            background: var(--navy-light);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 28px;
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(212, 168, 67, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .feature-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        /* CREDIBILITY */
+        .credibility {
+            background: var(--navy-light);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid rgba(212, 168, 67, 0.15);
+        }
+
+        .cred-quote {
+            font-size: 20px;
+            font-style: italic;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+
+        .cred-author {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .cred-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .cred-stat {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .cred-stat strong {
+            color: var(--white);
+        }
+
+        /* PRICING TEASER */
+        .pricing {
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .price-tag {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .price-tag span {
+            font-size: 18px;
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .price-context {
+            font-size: 15px;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+
+        /* CTA / WAITLIST */
+        .cta-section {
+            padding: 60px 0 80px;
+            text-align: center;
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, rgba(212, 168, 67, 0.1), rgba(212, 168, 67, 0.03));
+            border: 1px solid rgba(212, 168, 67, 0.25);
+            border-radius: 16px;
+            padding: 48px 32px;
+        }
+
+        .cta-box h2 {
+            margin-bottom: 12px;
+        }
+
+        .cta-box p {
+            color: var(--gray);
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto 12px;
+        }
+
+        @media (max-width: 500px) {
+            .form-row { flex-direction: column; }
+        }
+
+        input[type="email"],
+        input[type="text"],
+        input[type="number"] {
+            flex: 1;
+            background: var(--navy);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: var(--white);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--gold);
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        input[type="number"] {
+            max-width: 100px;
+        }
+
+        .btn {
+            background: var(--gold);
+            color: var(--navy);
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .form-note {
+            font-size: 13px;
+            color: var(--gray);
+            margin-top: 12px;
+        }
+
+        .waitlist-count {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* SUCCESS MESSAGE */
+        .success-msg {
+            display: none;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .success-msg.show { display: block; }
+
+        .success-msg p {
+            color: var(--green);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .success-msg span {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* FAQ */
+        .faq-item {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .faq-q {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .faq-a {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="badge">Early Access — Limitowane Miejsca</div>
+        <h1>Twój obiekt odpowiada gościom,<br><span class="highlight">zanim wstaniesz z&nbsp;łóżka</span></h1>
+        <p class="hero-sub">Asystent AI dla obiektów noclegowych 1-30 pokoi. Automatyczne odpowiedzi, maile, faktury, dynamiczne ceny. Nie obietnica&nbsp;&mdash; działający system.</p>
+
+        <div class="proof-bar">
+            <div class="proof-item">
+                <div class="proof-number">44</div>
+                <div class="proof-label">aktywne automatyzacje</div>
+            </div>
+            <div class="proof-item">
+                <div class="proof-number">51</div>
+                <div class="proof-label">zaplanowanych zadań</div>
+            </div>
+            <div class="proof-item">
+                <div class="proof-number">1</div>
+                <div class="proof-label">miesiąc na żywo</div>
+            </div>
+            <div class="proof-item">
+                <div class="proof-number">19</div>
+                <div class="proof-label">pokoi obsługiwanych</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROBLEM / SOLUTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-label">Problem</div>
+        <h2>Prowadzisz obiekt 1-30 pokoi?<br>Wiesz o&nbsp;czym mówimy.</h2>
+
+        <div class="two-col">
+            <div class="col-before">
+                <div class="col-title">Dzisiaj</div>
+                <ul>
+                    <li>Budzik o&nbsp;6:00 — sprawdzić maile z&nbsp;Booking</li>
+                    <li>Ręczne odpowiedzi na każdego gościa</li>
+                    <li>Cennik w&nbsp;Excelu, aktualizowany "jak się przypomni"</li>
+                    <li>Faktury ręczne, koniec miesiąca = panika</li>
+                    <li>Google Ads? "Nie mam czasu się w&nbsp;to bawić"</li>
+                    <li>30 min na obiekt? Bardziej 3 godziny</li>
+                </ul>
+            </div>
+            <div class="col-after">
+                <div class="col-title">Z&nbsp;Nocio</div>
+                <ul>
+                    <li>Gość pisze o&nbsp;2:00 w&nbsp;nocy — dostaje odpowiedź o&nbsp;2:01</li>
+                    <li>Każda rezerwacja potwierdzona automatycznie</li>
+                    <li>Ceny dostosowują się do sezonu i&nbsp;popytu</li>
+                    <li>Faktury wystawiane same, księgowa dostaje mailem</li>
+                    <li>Reklamy zarządzane przez AI — budżetowo</li>
+                    <li>Ty poświęcasz 30 minut dziennie. Reszta działa.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+    <div class="container">
+        <div class="section-label">Co robi Nocio</div>
+        <h2>Nie kolejne "narzędzie". Cały zespół w&nbsp;jednym systemie.</h2>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">&#9993;</div>
+                <div>
+                    <div class="feature-title">Automatyczne odpowiedzi na rezerwacje</div>
+                    <div class="feature-desc">Gość pisze z&nbsp;Booking, e-maila, formularza — AI odpowiada w&nbsp;Twoim stylu, z&nbsp;poprawnymi cenami i&nbsp;dostępnością. 24/7, bez opóźnień.</div>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">&#128176;</div>
+                <div>
+                    <div class="feature-title">Dynamiczny cennik</div>
+                    <div class="feature-desc">Ceny automatycznie reagują na sezon, długie weekendy, obłożenie. Koniec z&nbsp;"chyba za tanio sprzedałem majówkę".</div>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">&#128200;</div>
+                <div>
+                    <div class="feature-title">Google Ads + Meta na autopilocie</div>
+                    <div class="feature-desc">Kampanie reklamowe zarządzane przez AI. Negatywne słowa kluczowe, optymalizacja stawek, rotacja reklam. Zero klikania w&nbsp;panelu.</div>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">&#128203;</div>
+                <div>
+                    <div class="feature-title">Faktury i&nbsp;księgowość</div>
+                    <div class="feature-desc">Automatyczne faktury po każdej rezerwacji. Wysłane do księgowej. Integracja z&nbsp;KSeF. Koniec miesiąca = zero stresu.</div>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">&#127760;</div>
+                <div>
+                    <div class="feature-title">Strona internetowa + SEO</div>
+                    <div class="feature-desc">Szybka strona zoptymalizowana pod Google. Meta tagi, schema, PageSpeed 90+. Nie potrzebujesz webmastera.</div>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">&#128274;</div>
+                <div>
+                    <div class="feature-title">Dashboard — wszystko w&nbsp;jednym miejscu</div>
+                    <div class="feature-desc">Panel z&nbsp;rezerwacjami, przychodami, obłożeniem, alertami. Mobilny. Zamiast 5 zakładek w&nbsp;przeglądarce — jedna.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CREDIBILITY -->
+<section class="section">
+    <div class="container">
+        <div class="section-label">Dlaczego my</div>
+        <h2>Zbudowane przez właściciela obiektu,<br>nie przez software house</h2>
+
+        <div class="credibility">
+            <div class="cred-quote">"Ten system działa na moim obiekcie od marca 2026. 19 pokoi, 44 automatyzacje, 51 zaplanowanych zadań. Nie sprzedaję wizji&nbsp;&mdash; sprzedaję to, czego sam używam codziennie."</div>
+            <div class="cred-author">Łukasz&nbsp;&mdash; 6 lat mBank, 3 lata Accenture, 12 lat VITA Augustów</div>
+
+            <div class="cred-stats">
+                <div class="cred-stat"><strong>13,5 lat</strong> w&nbsp;IT</div>
+                <div class="cred-stat"><strong>12 lat</strong> w&nbsp;hotelarstwie</div>
+                <div class="cred-stat"><strong>19 pokoi</strong> obsługiwanych przez AI</div>
+                <div class="cred-stat"><strong>30 min/dzień</strong> na całość</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING TEASER -->
+<section class="pricing">
+    <div class="container">
+        <div class="section-label">Cennik</div>
+        <h2>Taniej niż pracownik na pół etatu</h2>
+        <div class="price-tag">500 zł <span>/miesiąc</span></div>
+        <p class="price-context">Bez limitu pokoi (do 30). Bez opłat za wdrożenie dla early adopters.<br>Dla porównania: recepcjonistka na pół etatu = 3 500 zł/mies.</p>
+    </div>
+</section>
+
+<!-- WAITLIST CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-box">
+            <h2>Dołącz do listy wczesnego dostępu</h2>
+            <p>Pierwsze 20 obiektów — wdrożenie gratis + cena zamrożona na rok.</p>
+
+            <form id="waitlist-form" onsubmit="handleSubmit(event)">
+                <div class="form-row">
+                    <input type="email" name="email" placeholder="Twój e-mail" required>
+                    <input type="text" name="name" placeholder="Nazwa obiektu">
+                </div>
+                <div class="form-row">
+                    <input type="number" name="rooms" placeholder="Ile pokoi" min="1" max="30">
+                    <button type="submit" class="btn">Zapisz mnie</button>
+                </div>
+                <div class="form-note">Zero spamu. Dostaniesz maila, gdy wystartujemy.</div>
+            </form>
+
+            <div class="success-msg" id="success">
+                <p>Jesteś na liście!</p>
+                <span>Odezwiemy się, gdy Nocio będzie gotowy dla Twojego obiektu.</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+    <div class="container">
+        <div class="section-label">Pytania</div>
+        <h2>Najczęstsze pytania</h2>
+
+        <div class="faq-item">
+            <div class="faq-q">Czy to zastąpi mój Channel Manager?</div>
+            <div class="faq-a">Nie. Nocio dopełnia Channel Manager — zajmuje się tym, czego Profitroom czy YieldPlanet nie robią: odpowiedzi na maile, faktury, dynamiczne ceny, reklamy, SEO. Współpracuje z&nbsp;Twoim istniejącym systemem.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q">Ile trwa wdrożenie?</div>
+            <div class="faq-a">Dla early adopters: 1-2 tygodnie. Podłączamy się do Twojego PMS, maila, strony. Nie musisz niczego instalować — system działa w&nbsp;chmurze.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q">Czy AI nie będzie odpowiadać bzdur gościom?</div>
+            <div class="faq-a">AI odpowiada TYLKO na podstawie Twoich danych — cennika, dostępności, regulaminu. Nie zmyśla. Masz pełną kontrolę nad tonem i&nbsp;treścią odpowiedzi. Możesz też ustawić zatwierdzanie przed wysłaniem.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q">A&nbsp;jeśli mam 5 pokoi, nie 19?</div>
+            <div class="faq-a">Idealnie. System był testowany na 19 pokojach, ale architektura obsługuje 1-30 pokoi bez różnicy w&nbsp;cenie. Mniejszy obiekt = szybsze wdrożenie.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q">Czy mogę zrezygnować?</div>
+            <div class="faq-a">Tak, w&nbsp;każdej chwili. Bez okresu wypowiedzenia, bez kar. Twoje dane są Twoje — eksportujemy wszystko.</div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        &copy; 2026 Nocio — nocio.pl. Produkt budowany w&nbsp;Polsce, dla polskich obiektów noclegowych.
+    </div>
+</footer>
+
+<script>
+function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    // TODO: podpiac pod Brevo/Supabase
+    console.log('Waitlist:', Object.fromEntries(data));
+    form.style.display = 'none';
+    document.getElementById('success').classList.add('show');
+}
+</script>
+
+</body>
+</html>
