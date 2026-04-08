@@ -652,11 +652,37 @@
 function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
-    const data = new FormData(form);
-    // TODO: podpiac pod Brevo/Supabase
-    console.log('Waitlist:', Object.fromEntries(data));
-    form.style.display = 'none';
-    document.getElementById('success').classList.add('show');
+    const btn = form.querySelector('.btn');
+    btn.textContent = 'Zapisuję...';
+    btn.disabled = true;
+
+    const data = Object.fromEntries(new FormData(form));
+
+    fetch('https://cmd.vita.augustow.pl/nocio/waitlist', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            email: data.email,
+            name: data.name,
+            rooms: data.rooms ? parseInt(data.rooms) : null
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.ok) {
+            form.style.display = 'none';
+            document.getElementById('success').classList.add('show');
+        } else {
+            btn.textContent = 'Zapisz mnie';
+            btn.disabled = false;
+            alert(res.error || 'Coś poszło nie tak. Spróbuj ponownie.');
+        }
+    })
+    .catch(() => {
+        btn.textContent = 'Zapisz mnie';
+        btn.disabled = false;
+        alert('Błąd połączenia. Spróbuj ponownie za chwilę.');
+    });
 }
 </script>
 
