@@ -658,6 +658,31 @@
 </footer>
 
 <script>
+function waitlistRoomsBucket(rooms) {
+    const count = parseInt(rooms, 10);
+    if (!Number.isFinite(count)) return 'unknown';
+    if (count <= 5) return '1-5';
+    if (count <= 10) return '6-10';
+    if (count <= 20) return '11-20';
+    return '21-30';
+}
+
+function trackWaitlistEvent(eventName, params = {}) {
+    if (typeof gtag !== 'function') return;
+    gtag('event', eventName, Object.assign({
+        event_category: 'waitlist',
+        event_label: 'nocio',
+        page_path: window.location.pathname
+    }, params));
+}
+
+function waitlistTrackingContext(data) {
+    return {
+        rooms_bucket: waitlistRoomsBucket(data.rooms),
+        has_object_name: data.name ? 'yes' : 'no'
+    };
+}
+
 function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
@@ -666,6 +691,11 @@ function handleSubmit(e) {
     btn.disabled = true;
 
     const data = Object.fromEntries(new FormData(form));
+    const isHoneypot = Boolean(data.website);
+    const trackingContext = waitlistTrackingContext(data);
+    if (!isHoneypot) {
+        trackWaitlistEvent('waitlist_submit_attempt', trackingContext);
+    }
 
     fetch('https://webhook.nocio.pl/api/nocio/waitlist', {
         method: 'POST',
@@ -678,24 +708,48 @@ function handleSubmit(e) {
             pageUrl: window.location.href
         })
     })
-    .then(r => r.json())
+    .then(async r => {
+        const res = await r.json().catch(() => ({}));
+        if (!r.ok) {
+            const error = new Error(res.detail || res.error || 'request_failed');
+            error.status = r.status;
+            error.reason = res.detail || res.error || 'request_failed';
+            throw error;
+        }
+        return res;
+    })
     .then(res => {
         if (res.ok) {
-            if (typeof gtag === 'function') {
-                gtag('event', 'generate_lead', {event_category: 'waitlist', event_label: 'nocio'});
+            if (!isHoneypot) {
+                trackWaitlistEvent('waitlist_submit_success', Object.assign({}, trackingContext, {
+                    brevo_ok: res.brevo === false ? 'no' : 'yes',
+                    confirmation_email_ok: res.confirmationEmail === false ? 'no' : 'yes'
+                }));
+                trackWaitlistEvent('generate_lead', trackingContext);
             }
             form.style.display = 'none';
             document.getElementById('success').classList.add('show');
         } else {
+            if (!isHoneypot) {
+                trackWaitlistEvent('waitlist_submit_error', Object.assign({}, trackingContext, {
+                    failure_reason: res.error || 'backend_rejected'
+                }));
+            }
             btn.textContent = 'Zapisz mnie';
             btn.disabled = false;
             alert(res.error || 'Coś poszło nie tak. Spróbuj ponownie.');
         }
     })
-    .catch(() => {
+    .catch((error) => {
+        if (!isHoneypot) {
+            trackWaitlistEvent('waitlist_submit_error', Object.assign({}, trackingContext, {
+                failure_reason: error.reason || 'network_error',
+                status_code: error.status || 0
+            }));
+        }
         btn.textContent = 'Zapisz mnie';
         btn.disabled = false;
-        alert('Błąd połączenia. Spróbuj ponownie za chwilę.');
+        alert(error.reason || 'Błąd połączenia. Spróbuj ponownie za chwilę.');
     });
 }
 </script>
