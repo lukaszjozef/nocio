@@ -597,6 +597,7 @@
             <p>Pierwsze 20 obiektów — wdrożenie gratis + cena zamrożona na rok.</p>
 
             <form id="waitlist-form" onsubmit="handleSubmit(event)">
+                <input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
                 <div class="form-row">
                     <input type="email" name="email" placeholder="Twój e-mail" required>
                     <input type="text" name="name" placeholder="Nazwa obiektu">
@@ -666,18 +667,23 @@ function handleSubmit(e) {
 
     const data = Object.fromEntries(new FormData(form));
 
-    fetch('https://cmd.vita.augustow.pl/nocio/waitlist', {
+    fetch('https://webhook.nocio.pl/api/nocio/waitlist', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             email: data.email,
             name: data.name,
-            rooms: data.rooms ? parseInt(data.rooms) : null
+            rooms: data.rooms ? parseInt(data.rooms) : null,
+            website: data.website || '',
+            pageUrl: window.location.href
         })
     })
     .then(r => r.json())
     .then(res => {
         if (res.ok) {
+            if (typeof gtag === 'function') {
+                gtag('event', 'generate_lead', {event_category: 'waitlist', event_label: 'nocio'});
+            }
             form.style.display = 'none';
             document.getElementById('success').classList.add('show');
         } else {
